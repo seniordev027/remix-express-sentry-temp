@@ -3,6 +3,7 @@ const express = require("express");
 const compression = require("compression");
 const morgan = require("morgan");
 const { createRequestHandler } = require("@remix-run/express");
+const { wrapExpressCreateRequestHandler } = require("@sentry/remix");
 
 const BUILD_DIR = path.join(process.cwd(), "build");
 
@@ -31,12 +32,12 @@ app.all(
     ? (req, res, next) => {
         purgeRequireCache();
 
-        return createRequestHandler({
+        return wrapExpressCreateRequestHandler(createRequestHandler)({
           build: require(BUILD_DIR),
           mode: process.env.NODE_ENV,
         })(req, res, next);
       }
-    : createRequestHandler({
+    : wrapExpressCreateRequestHandler(createRequestHandler)({
         build: require(BUILD_DIR),
         mode: process.env.NODE_ENV,
       })
